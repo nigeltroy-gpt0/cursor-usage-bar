@@ -5,6 +5,7 @@ import ServiceManagement
 @MainActor
 final class UsageStore: ObservableObject {
     @Published private(set) var snapshot: UsageSnapshot?
+    @Published private(set) var todayDollars: Double?
     @Published private(set) var errorMessage: String?
     @Published private(set) var isLoading = false
 
@@ -71,7 +72,10 @@ final class UsageStore: ObservableObject {
             defer { isLoading = false }
             do {
                 let creds = try CursorAuth.loadCredentials()
-                snapshot = try await UsageAPI.fetchSummary(credentials: creds)
+                async let summary = UsageAPI.fetchSummary(credentials: creds)
+                async let today = UsageAPI.fetchDailyUsage(credentials: creds, days: 1)
+                snapshot = try await summary
+                if let t = (try? await today)?.first?.dollars { todayDollars = t }
                 errorMessage = nil
             } catch {
                 errorMessage = error.localizedDescription

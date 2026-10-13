@@ -80,6 +80,15 @@ struct UsageMenuView: View {
                 ProgressView(value: min(f, 1))
                     .tint(f >= 0.9 ? .red : f >= 0.7 ? .orange : .accentColor)
             }
+            HStack {
+                Text("Today: \(store.todayDollars.map { UsageStore.money($0) } ?? "–")")
+                    .monospacedDigit()
+                Spacer()
+                Button("See usage history") { HistoryWindowController.shared.show() }
+                    .controlSize(.small)
+            }
+            .font(.callout)
+            .padding(.top, 2)
             if let odUsed = s.onDemandUsedDollars {
                 let limitText = s.onDemandLimitDollars.map { " of \(UsageStore.money($0))" } ?? ""
                 Text("On-demand: \(UsageStore.money(odUsed))\(limitText)")

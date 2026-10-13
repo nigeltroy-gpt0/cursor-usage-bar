@@ -2,7 +2,9 @@
 
 A macOS menu bar app that shows your Cursor spend for the current billing cycle, e.g. `$96/$1500 · 19d`.
 
-Click it for the details: exact spend, % of limit, billing period, days left, plan type, and settings.
+Click it for the details: exact spend, % of limit, today's spend, billing period, days left, plan type, and settings.
+
+**See usage history** opens a 30-day bar chart of daily spend. It shows the total, the 30-day and billing-period daily averages, and the peak day. Hover a bar to see that day's amount.
 
 ## Install
 
@@ -55,5 +57,6 @@ The menu bar rounds numbers up to keep the text short. The dropdown shows exact 
   (`~/Library/Application Support/Cursor/User/globalStorage/state.vscdb`, key `cursorAuth/accessToken`).
   It's re-read on every refresh, so it picks up the new token whenever Cursor rotates it. The token is never stored and is only sent to cursor.com.
 - **API:** `GET https://cursor.com/api/usage-summary` with the `WorkosCursorSessionToken` cookie. It returns the billing cycle start and end plus used and limit amounts in cents.
+- **Daily spend:** `POST https://cursor.com/api/dashboard/get-filtered-usage-events` returns individual usage events. The app sums `chargedCents` by local calendar day, which matches the `usage-summary` total.
 
-Note: `usage-summary` is an undocumented endpoint used by Cursor's dashboard, so it may change without notice.
+Note: these are undocumented endpoints used by Cursor's dashboard, so they may change without notice.
