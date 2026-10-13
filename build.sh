@@ -1,20 +1,22 @@
 #!/bin/bash
-# Builds CursorUsageBar.app.
+# Builds "Cursor Usage Bar.app".
 #   --install  copy it to /Applications and launch it
-#   --dmg      also package build/CursorUsageBar.dmg (drag-to-Applications installer)
+#   --dmg      also package build/cursor-usage-bar.dmg (drag-to-Applications installer)
 set -euo pipefail
 cd "$(dirname "$0")"
 
-APP_NAME="CursorUsageBar"
+EXEC_NAME="CursorUsageBar"          # SwiftPM product / binary name
+APP_NAME="Cursor Usage Bar"         # user-facing .app name
+DMG_NAME="cursor-usage-bar.dmg"
 APP="build/$APP_NAME.app"
 VERSION="${VERSION:-1.0.0}"
 
 swift build -c release
-BIN="$(swift build -c release --show-bin-path)/$APP_NAME"
+BIN="$(swift build -c release --show-bin-path)/$EXEC_NAME"
 
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
-cp "$BIN" "$APP/Contents/MacOS/$APP_NAME"
+cp "$BIN" "$APP/Contents/MacOS/$EXEC_NAME"
 
 cat > "$APP/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
@@ -22,11 +24,11 @@ cat > "$APP/Contents/Info.plist" <<PLIST
 <plist version="1.0">
 <dict>
     <key>CFBundleName</key><string>$APP_NAME</string>
-    <key>CFBundleDisplayName</key><string>Cursor Usage</string>
+    <key>CFBundleDisplayName</key><string>$APP_NAME</string>
     <key>CFBundleIdentifier</key><string>com.local.cursorusagebar</string>
-    <key>CFBundleExecutable</key><string>$APP_NAME</string>
+    <key>CFBundleExecutable</key><string>$EXEC_NAME</string>
     <key>CFBundlePackageType</key><string>APPL</string>
-    <key>CFBundleShortVersionString</key><string>${VERSION:-1.0.0}</string>
+    <key>CFBundleShortVersionString</key><string>$VERSION</string>
     <key>CFBundleVersion</key><string>1</string>
     <key>LSMinimumSystemVersion</key><string>13.0</string>
     <key>LSUIElement</key><true/>
@@ -38,7 +40,7 @@ codesign --force --sign - "$APP"
 echo "Built $APP"
 
 if [[ "${1:-}" == "--install" ]]; then
-    pkill -x "$APP_NAME" 2>/dev/null || true
+    pkill -x "$EXEC_NAME" 2>/dev/null || true
     rm -rf "/Applications/$APP_NAME.app"
     cp -R "$APP" /Applications/
     open "/Applications/$APP_NAME.app"
@@ -46,13 +48,13 @@ if [[ "${1:-}" == "--install" ]]; then
 fi
 
 if [[ "${1:-}" == "--dmg" ]]; then
-    DMG="build/$APP_NAME.dmg"
+    DMG="build/$DMG_NAME"
     STAGING="build/dmg"
     rm -rf "$STAGING" "$DMG"
     mkdir -p "$STAGING"
     cp -R "$APP" "$STAGING/"
     ln -s /Applications "$STAGING/Applications"
-    hdiutil create -volname "Cursor Usage" -srcfolder "$STAGING" -ov -format UDZO "$DMG" >/dev/null
+    hdiutil create -volname "$APP_NAME" -srcfolder "$STAGING" -ov -format UDZO "$DMG" >/dev/null
     rm -rf "$STAGING"
     echo "Packaged $DMG"
 fi

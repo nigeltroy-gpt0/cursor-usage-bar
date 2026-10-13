@@ -23,14 +23,14 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: CursorUsageBar.dmg
-          path: build/CursorUsageBar.dmg
+          name: cursor-usage-bar.dmg
+          path: build/cursor-usage-bar.dmg
 
       - name: Publish release
         if: github.ref_type == 'tag'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create "$GITHUB_REF_NAME" build/CursorUsageBar.dmg \
+          gh release create "$GITHUB_REF_NAME" build/cursor-usage-bar.dmg \
             --title "$GITHUB_REF_NAME" --generate-notes \
-            || gh release upload "$GITHUB_REF_NAME" build/CursorUsageBar.dmg --clobber
+            || gh release upload "$GITHUB_REF_NAME" build/cursor-usage-bar.dmg --clobber

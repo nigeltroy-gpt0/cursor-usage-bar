@@ -47,7 +47,7 @@ struct UsageMenuView: View {
 
     private var header: some View {
         HStack {
-            Text("Cursor Usage").font(.headline)
+            Text("Cursor Usage Bar").font(.headline)
             Spacer()
             if store.isLoading {
                 ProgressView().controlSize(.small)

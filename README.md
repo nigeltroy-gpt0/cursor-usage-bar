@@ -1,4 +1,4 @@
-# CursorUsageBar
+# Cursor Usage Bar
 
 A macOS menu bar app that shows your Cursor spend for the current billing cycle, e.g. `$96/$1500 · 19d`.
 
@@ -6,14 +6,14 @@ Click it for the details: exact spend, % of limit, billing period, days left, pl
 
 ## Install
 
-1. Download `CursorUsageBar.dmg` from the [latest release](../../releases/latest).
-2. Open it and drag **CursorUsageBar** into **Applications**.
+1. Download `cursor-usage-bar.dmg` from the [latest release](../../releases/latest).
+2. Open it and drag **Cursor Usage Bar** into **Applications**.
 3. Launch it from Applications. It only appears in the menu bar (no Dock icon).
 
 The app is ad-hoc signed, not notarized, so macOS blocks it the first time you open a downloaded copy. To allow it, open **System Settings → Privacy & Security** and click **Open Anyway**. Or run:
 
 ```bash
-xattr -dr com.apple.quarantine /Applications/CursorUsageBar.app
+xattr -dr com.apple.quarantine "/Applications/Cursor Usage Bar.app"
 ```
 
 You must have Cursor installed and be signed in to it. The app reads Cursor's login from your Mac.
@@ -23,11 +23,11 @@ You must have Cursor installed and be signed in to it. The app reads Cursor's lo
 Requires macOS 13+ and Xcode or the Command Line Tools (`xcode-select --install`).
 
 ```bash
-git clone https://github.com/nigeltroy-gpt0/CursorUsageBar.git
-cd CursorUsageBar
-./build.sh             # builds build/CursorUsageBar.app
+git clone https://github.com/nigeltroy-gpt0/cursor-usage-bar.git
+cd cursor-usage-bar
+./build.sh             # builds "build/Cursor Usage Bar.app"
 ./build.sh --install   # builds, copies to /Applications, launches
-./build.sh --dmg       # builds build/CursorUsageBar.dmg
+./build.sh --dmg       # builds build/cursor-usage-bar.dmg
 ```
 
 Set `VERSION=1.2.3` to stamp a version into the app's Info.plist.
