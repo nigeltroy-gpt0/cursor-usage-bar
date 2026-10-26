@@ -61,6 +61,7 @@ final class UsageStore: ObservableObject {
 
         scheduleTimer()
         refresh()
+        Updater.shared.start()
     }
 
     // MARK: - Fetching

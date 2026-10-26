@@ -17,6 +17,7 @@ struct CursorUsageBarApp: App {
 
 struct UsageMenuView: View {
     @ObservedObject var store: UsageStore
+    @ObservedObject private var updater = Updater.shared
 
     private static let periodFormatter: DateFormatter = {
         let f = DateFormatter()
@@ -47,7 +48,10 @@ struct UsageMenuView: View {
 
     private var header: some View {
         HStack {
-            Text("Cursor Usage Bar").font(.headline)
+            HStack(alignment: .firstTextBaseline, spacing: 5) {
+                Text("Cursor Usage Bar").font(.headline)
+                Text("v\(Updater.currentVersion)").font(.caption).foregroundStyle(.secondary)
+            }
             Spacer()
             if store.isLoading {
                 ProgressView().controlSize(.small)
@@ -135,6 +139,17 @@ struct UsageMenuView: View {
                 Text(note).font(.caption).foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
+            HStack {
+                Button("Check for updates") { updater.checkNow(manual: true) }
+                    .disabled(updater.isChecking)
+                    .controlSize(.small)
+                if let status = updater.status {
+                    Text(status).font(.caption).foregroundStyle(.secondary)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .padding(.top, 2)
         }
         .toggleStyle(.checkbox)
     }

@@ -20,6 +20,12 @@ xattr -dr com.apple.quarantine "/Applications/Cursor Usage Bar.app"
 
 You must have Cursor installed and be signed in to it. The app reads Cursor's login from your Mac. On Cursor 3.27+, macOS asks once for access to the "Cursor Safe Storage" Keychain item: click **Always Allow**.
 
+### Updates
+
+The app checks this repo's [releases](../../releases) once a day. If there's a newer version, it downloads the DMG, replaces the installed app, and relaunches. To check right away, click **Check for updates** in the dropdown. The installed version appears next to the title.
+
+Updates need write access to the app's location (e.g. `/Applications`). After an update, macOS asks again for "Cursor Safe Storage" Keychain access (see below).
+
 ## Build from source
 
 Requires macOS 13+ and Xcode or the Command Line Tools (`xcode-select --install`).
@@ -32,7 +38,7 @@ cd cursor-usage-bar
 ./build.sh --dmg       # builds build/cursor-usage-bar.dmg
 ```
 
-Set `VERSION=1.2.3` to stamp a version into the app's Info.plist.
+The version defaults to the latest git tag. Set `VERSION=1.2.3` to override it. A local build only gets auto-updated when a newer release is published.
 
 ## Releases
 

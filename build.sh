@@ -9,7 +9,10 @@ EXEC_NAME="CursorUsageBar"          # SwiftPM product / binary name
 APP_NAME="Cursor Usage Bar"         # user-facing .app name
 DMG_NAME="cursor-usage-bar.dmg"
 APP="build/$APP_NAME.app"
-VERSION="${VERSION:-1.0.0}"
+if [[ -z "${VERSION:-}" ]]; then
+    VERSION="$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//')"
+    VERSION="${VERSION:-0.0.0}"
+fi
 
 swift build -c release
 BIN="$(swift build -c release --show-bin-path)/$EXEC_NAME"
