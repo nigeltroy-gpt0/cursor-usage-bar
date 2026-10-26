@@ -18,7 +18,7 @@ The app is ad-hoc signed, not notarized, so macOS blocks it the first time you o
 xattr -dr com.apple.quarantine "/Applications/Cursor Usage Bar.app"
 ```
 
-You must have Cursor installed and be signed in to it. The app reads Cursor's login from your Mac.
+You must have Cursor installed and be signed in to it. The app reads Cursor's login from your Mac. On Cursor 3.27+, macOS asks once for access to the "Cursor Safe Storage" Keychain item: click **Always Allow**.
 
 ## Build from source
 
@@ -56,6 +56,7 @@ The menu bar rounds numbers up to keep the text short. The dropdown shows exact 
 - **Token:** read-only from Cursor's local state DB
   (`~/Library/Application Support/Cursor/User/globalStorage/state.vscdb`, key `cursorAuth/accessToken`).
   It's re-read on every refresh, so it picks up the new token whenever Cursor rotates it. The token is never stored and is only sent to cursor.com.
+  Since Cursor 3.27, the token is encrypted at rest (`cursor-safe-storage:v1:` prefix, Electron `safeStorage`). The app decrypts it with the key in your Keychain under **Cursor Safe Storage**. The first time, macOS asks to allow this: enter your password and click **Always Allow**. Because the app isn't Developer ID–signed, macOS asks again after each update.
 - **API:** `GET https://cursor.com/api/usage-summary` with the `WorkosCursorSessionToken` cookie. It returns the billing cycle start and end plus used and limit amounts in cents.
 - **Daily spend:** `POST https://cursor.com/api/dashboard/get-filtered-usage-events` returns individual usage events. The app sums `chargedCents` by local calendar day, which matches the `usage-summary` total.
 
