@@ -33,9 +33,8 @@ final class Updater: ObservableObject {
         Bundle.main.infoDictionary?["CUBTestBuild"] as? Bool ?? false
     }
 
-    static var appName: String {
-        Bundle.main.infoDictionary?["CFBundleDisplayName"] as? String ?? "Cursor Usage Bar"
-    }
+    /// Name shown in the UI. Deliberately the same for test builds, so the test UI mirrors production.
+    static let productName = "Cursor Usage Bar"
 
     static var currentVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.0.0"

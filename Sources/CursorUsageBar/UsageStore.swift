@@ -59,6 +59,13 @@ final class UsageStore: ObservableObject {
             Task { @MainActor in self?.refresh() }
         }
 
+        DataSource.shared.onChange = { [weak self] in
+            self?.snapshot = nil
+            self?.todayDollars = nil
+            self?.refresh()
+        }
+        DataSource.shared.installTestMenu()
+
         scheduleTimer()
         refresh()
         Updater.shared.start()
@@ -68,6 +75,12 @@ final class UsageStore: ObservableObject {
 
     func refresh() {
         guard !isLoading else { return }
+        if !DataSource.shared.useLiveData {
+            snapshot = StubData.snapshot()
+            todayDollars = StubData.today()
+            errorMessage = nil
+            return
+        }
         isLoading = true
         Task {
             defer { isLoading = false }
@@ -149,12 +162,25 @@ final class UsageStore: ObservableObject {
         }
     }
 
-    /// Rounded up to the nearest dollar, for the compact menu bar title.
+    private static func currencyFormatter(fractionDigits: Int) -> NumberFormatter {
+        let f = NumberFormatter()
+        f.numberStyle = .currency
+        f.currencyCode = "USD"
+        f.locale = Locale(identifier: "en_US")
+        f.minimumFractionDigits = fractionDigits
+        f.maximumFractionDigits = fractionDigits
+        return f
+    }
+    private static let centsFormatter = currencyFormatter(fractionDigits: 2)
+    private static let dollarsFormatter = currencyFormatter(fractionDigits: 0)
+
+    /// Rounded up to the nearest dollar, for the compact menu bar title, e.g. "$1,500".
     static func wholeMoney(_ value: Double) -> String {
-        "$" + String(Int(value.rounded(.up)))
+        dollarsFormatter.string(from: NSNumber(value: value.rounded(.up))) ?? "$\(Int(value.rounded(.up)))"
     }
 
+    /// Exact amount with cents and thousands separators, e.g. "$1,500.00".
     static func money(_ value: Double) -> String {
-        "$" + String(format: "%.2f", value)
+        centsFormatter.string(from: NSNumber(value: value)) ?? String(format: "$%.2f", value)
     }
 }

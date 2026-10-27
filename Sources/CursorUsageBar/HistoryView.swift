@@ -12,8 +12,20 @@ final class HistoryModel: ObservableObject {
     @Published private(set) var errorMessage: String?
     @Published private(set) var loadedAt: Date?
 
+    func reset() {
+        days = []
+        summary = nil
+    }
+
     func load() {
         guard !isLoading else { return }
+        if !DataSource.shared.useLiveData {
+            days = StubData.daily(days: Self.days)
+            summary = StubData.snapshot()
+            loadedAt = Date()
+            errorMessage = nil
+            return
+        }
         isLoading = true
         Task {
             defer { isLoading = false }
@@ -39,6 +51,12 @@ final class HistoryWindowController {
     private let model = HistoryModel()
     private var window: NSWindow?
 
+    func reloadIfOpen() {
+        guard window?.isVisible == true else { return }
+        model.reset()
+        model.load()
+    }
+
     func show() {
         if window == nil {
             let w = NSWindow(
@@ -46,7 +64,7 @@ final class HistoryWindowController {
                 styleMask: [.titled, .closable, .miniaturizable, .resizable],
                 backing: .buffered, defer: false
             )
-            w.title = "\(Updater.appName) — Last \(HistoryModel.days) Days"
+            w.title = "\(Updater.productName) — Last \(HistoryModel.days) Days"
             w.contentViewController = NSHostingController(rootView: HistoryView(model: model))
             w.isReleasedWhenClosed = false
             w.center()
@@ -66,7 +84,7 @@ struct HistoryView: View {
     private var peak: DailyUsage? { model.days.max { $0.dollars < $1.dollars } }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: Theme.Space.l) {
             header
             if model.days.isEmpty {
                 Group {
@@ -78,18 +96,20 @@ struct HistoryView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: Theme.Space.xs) {
                     hoverReadout
                     chart
                 }
             }
         }
-        .padding(16)
+        .padding(Theme.Space.l)
+        .font(.appBody)
+        .controlSize(.regular)
         .frame(minWidth: 520, minHeight: 320)
     }
 
     private var header: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 18) {
+        HStack(alignment: .firstTextBaseline, spacing: Theme.Space.l + Theme.Space.s) {
             stat("Total", UsageStore.money(total))
             stat("Daily avg (30d)", UsageStore.money(model.days.isEmpty ? 0 : total / Double(model.days.count)))
             if let avg = model.summary?.periodDailyAverage {
@@ -107,16 +127,15 @@ struct HistoryView: View {
         Text(hovered.map {
             "\($0.date.formatted(.dateTime.weekday(.wide).month(.abbreviated).day())): \(UsageStore.money($0.dollars))"
         } ?? " ")
-        .font(.callout)
         .monospacedDigit()
         .foregroundStyle(.secondary)
         .frame(maxWidth: .infinity, alignment: .trailing)
     }
 
     private func stat(_ label: String, _ value: String) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(label).font(.caption).foregroundStyle(.secondary)
-            Text(value).font(.headline).monospacedDigit()
+        VStack(alignment: .leading, spacing: Theme.Space.xs) {
+            Text(label).foregroundStyle(.secondary)
+            Text(value).font(.appHeading).monospacedDigit()
         }
     }
 
@@ -135,14 +154,14 @@ struct HistoryView: View {
             AxisMarks(position: .leading, values: axis.ticks) { value in
                 AxisGridLine()
                 AxisValueLabel {
-                    if let v = value.as(Double.self) { Text(axis.label(v)) }
+                    if let v = value.as(Double.self) { Text(axis.label(v)).font(.appBody) }
                 }
             }
         }
         .chartXAxis {
             AxisMarks(values: .stride(by: .day, count: 5)) { _ in
                 AxisGridLine()
-                AxisValueLabel(format: .dateTime.month(.abbreviated).day())
+                AxisValueLabel(format: .dateTime.month(.abbreviated).day()).font(.appBody)
             }
         }
         .chartOverlay { proxy in

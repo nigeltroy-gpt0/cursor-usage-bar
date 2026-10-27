@@ -55,6 +55,12 @@ struct UsageSnapshot {
         return usedDollars / elapsed
     }
 
+    /// Spend by the end of the billing period if the current daily average holds.
+    var projectedDollars: Double? {
+        guard let avg = periodDailyAverage, let start = periodStart, let end = periodEnd else { return nil }
+        return avg * max(1, (end.timeIntervalSince(start) / 86_400).rounded())
+    }
+
     init(summary s: UsageSummary, fetchedAt: Date = Date()) {
         let main = s.individualUsage?.overall ?? s.individualUsage?.plan
         usedDollars = (main?.used ?? 0) / 100
