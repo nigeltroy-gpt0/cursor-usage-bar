@@ -41,3 +41,8 @@ extension Font {
     /// "of $1,500.00", the percentage, and the header icons: 13pt.
     static let appHeroDetail = Font.body
 }
+
+extension ShapeStyle where Self == HierarchicalShapeStyle {
+    /// A step lighter than `.secondary`, for low-priority text like "Updated …".
+    static var footnote: HierarchicalShapeStyle { .tertiary }
+}

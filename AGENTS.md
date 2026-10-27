@@ -28,6 +28,7 @@ The main-line **Cursor Usage Bar** app may be installed and running on this mach
 - All sizes come from `Theme.swift`. Don't use literal font sizes or spacing in views, and don't use semantic fonts like `.caption` or `.headline`.
   - Font sizes:
     - 12pt (`.appBody`) for all text and every control (buttons, pickers, checkboxes).
+    - The "Updated …" footnote is 12pt, coloured `.footnote` (one step lighter than `.secondary`).
     - 16pt (`.appHeading`) for key stats in the history window.
     - **Exception:** the header and amount section (title, version, ↻ and ⚙ icons, the main $ amount, "of $X", and the percentage) keeps production v1.4.0's system styles, because the user prefers them. That means `.appTitle` (13pt bold), `.appVersion` (10pt), `.appHero` (17pt rounded semibold) and `.appHeroDetail` (13pt), with 5pt and 6pt spacing there. The panel likewise keeps production's 300pt width and 14pt padding. Don't "normalize" these to the 4-pt scale.
   - Spacing: 4, 8, 12 or 16pt (`Theme.Space`).

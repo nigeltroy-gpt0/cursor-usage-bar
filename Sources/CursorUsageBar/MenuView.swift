@@ -191,7 +191,7 @@ struct UsageMenuView: View {
         HStack(spacing: Theme.Space.s) {
             if let s = store.snapshot {
                 Text("Updated \(s.fetchedAt.formatted(date: .omitted, time: .shortened))")
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.footnote)
             }
             Spacer()
             Button("Quit") { NSApp.terminate(nil) }
