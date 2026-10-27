@@ -18,11 +18,21 @@ final class Updater: ObservableObject {
     private var timer: Timer?
     @Published private var isRunning = false
 
+    /// Local test builds ("(Test) Cursor Usage Bar") never auto-update; that would replace them with the release.
+    static var isTestBuild: Bool {
+        Bundle.main.infoDictionary?["CUBTestBuild"] as? Bool ?? false
+    }
+
+    static var appName: String {
+        Bundle.main.infoDictionary?["CFBundleDisplayName"] as? String ?? "Cursor Usage Bar"
+    }
+
     static var currentVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.0.0"
     }
 
     func start() {
+        guard !Self.isTestBuild else { return }
         // Hourly tick; actually hits GitHub only when 24h have passed since the last check.
         let t = Timer(timeInterval: 60 * 60, repeats: true) { [weak self] _ in
             Task { @MainActor in self?.checkIfDue() }
@@ -41,6 +51,10 @@ final class Updater: ObservableObject {
     /// `manual` = triggered from the "Check for updates" button, so report "up to date" too.
     func checkNow(manual: Bool = false) {
         guard !isRunning else { return }
+        if Self.isTestBuild {
+            if manual { status = "Updates are disabled in test builds." }
+            return
+        }
         isRunning = true
         if manual { status = "Checking for updates…" }
         Task {

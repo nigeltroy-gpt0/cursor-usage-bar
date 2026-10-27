@@ -19,7 +19,7 @@ jobs:
       - name: Build DMG
         run: |
           if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then export VERSION="${GITHUB_REF_NAME#v}"; fi
-          ./build.sh --dmg
+          ./build.sh --release --dmg
 
       - uses: actions/upload-artifact@v4
         with:

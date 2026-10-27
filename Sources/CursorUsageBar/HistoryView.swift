@@ -46,7 +46,7 @@ final class HistoryWindowController {
                 styleMask: [.titled, .closable, .miniaturizable, .resizable],
                 backing: .buffered, defer: false
             )
-            w.title = "Cursor Usage — Last \(HistoryModel.days) Days"
+            w.title = "\(Updater.appName) — Last \(HistoryModel.days) Days"
             w.contentViewController = NSHostingController(rootView: HistoryView(model: model))
             w.isReleasedWhenClosed = false
             w.center()

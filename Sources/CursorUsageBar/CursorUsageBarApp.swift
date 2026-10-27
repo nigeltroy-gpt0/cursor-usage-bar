@@ -91,7 +91,7 @@ struct UsageMenuView: View {
     private var header: some View {
         HStack {
             HStack(alignment: .firstTextBaseline, spacing: 5) {
-                Text("Cursor Usage Bar").font(.headline)
+                Text(Updater.appName).font(.headline)
                 Text("v\(Updater.currentVersion)").font(.caption).foregroundStyle(.secondary)
             }
             Spacer()
@@ -197,7 +197,7 @@ struct UsageMenuView: View {
                     .disabled(updater.isChecking)
                     .controlSize(.small)
             }
-            Text(updater.status ?? "Checks for updates automatically once a day.")
+            Text(updater.status ?? (Updater.isTestBuild ? "Test build: automatic updates are off." : "Checks for updates automatically once a day."))
                 .font(.caption).foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
         }

@@ -33,12 +33,15 @@ Requires macOS 13+ and Xcode or the Command Line Tools (`xcode-select --install`
 ```bash
 git clone https://github.com/nigeltroy-gpt0/cursor-usage-bar.git
 cd cursor-usage-bar
-./build.sh             # builds "build/Cursor Usage Bar.app"
-./build.sh --install   # builds, copies to /Applications, launches
-./build.sh --dmg       # builds build/cursor-usage-bar.dmg
+./build.sh                       # test build: "build/(Test) Cursor Usage Bar.app"
+./build.sh --run                 # test build, launched from build/
+./build.sh --install             # test build, copied to /Applications and launched
+./build.sh --release --dmg       # real app + build/cursor-usage-bar.dmg (what CI ships)
 ```
 
-The version defaults to the latest git tag. Set `VERSION=1.2.3` to override it. A local build only gets auto-updated when a newer release is published.
+Local builds are test builds by default: **(Test) Cursor Usage Bar**, with bundle ID `com.local.cursorusagebar.test` and a separate process and settings. They never quit or replace an installed main-line copy, and they don't auto-update. Pass `--release` to build the real app.
+
+The version defaults to the latest git tag. Set `VERSION=1.2.3` to override it.
 
 ## Releases
 
