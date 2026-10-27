@@ -35,7 +35,7 @@ else
 fi
 APP="build/$APP_NAME.app"
 if [[ -z "${VERSION:-}" ]]; then
-    VERSION="$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//')"
+    VERSION="$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || true)"
     VERSION="${VERSION:-0.0.0}"
 fi
 

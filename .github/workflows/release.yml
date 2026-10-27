@@ -15,6 +15,8 @@ jobs:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # tags, so non-tag builds get a real version from git describe
 
       - name: Build DMG
         run: |
