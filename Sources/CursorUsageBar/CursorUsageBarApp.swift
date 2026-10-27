@@ -188,6 +188,13 @@ struct UsageMenuView: View {
         .toggleStyle(.checkbox)
     }
 
+    private var updatesHint: String {
+        if Updater.isTestBuild { return "Test build: automatic updates are off." }
+        return updater.autoUpdateEnabled
+            ? "Checks for updates automatically once a day."
+            : "Automatic updates are off. Use Check for updates to update."
+    }
+
     private var updatesSection: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
@@ -197,7 +204,10 @@ struct UsageMenuView: View {
                     .disabled(updater.isChecking)
                     .controlSize(.small)
             }
-            Text(updater.status ?? (Updater.isTestBuild ? "Test build: automatic updates are off." : "Checks for updates automatically once a day."))
+            Toggle("Automatically check for updates", isOn: $updater.autoUpdateEnabled)
+                .toggleStyle(.checkbox)
+                .disabled(Updater.isTestBuild)
+            Text(updater.status ?? updatesHint)
                 .font(.caption).foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
         }

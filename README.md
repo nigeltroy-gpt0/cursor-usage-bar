@@ -22,7 +22,7 @@ You must have Cursor installed and be signed in to it. The app reads Cursor's lo
 
 ### Updates
 
-The app checks this repo's [releases](../../releases) once a day. If there's a newer version, it downloads the DMG, replaces the installed app, and relaunches. To check right away, click **Check for updates** in Settings (gear icon). The installed version appears next to the title.
+The app checks this repo's [releases](../../releases) once a day. If there's a newer version, it downloads the DMG, replaces the installed app, and relaunches. To check right away, click **Check for updates** in Settings (gear icon). The installed version appears next to the title. To update only when you choose, turn off **Automatically check for updates** in Settings.
 
 Updates need write access to the app's location (e.g. `/Applications`). After an update, macOS asks again for "Cursor Safe Storage" Keychain access (see below).
 
@@ -58,6 +58,7 @@ Open Settings with the gear icon in the dropdown, and use **‹ Back** to return
 - **Refresh every:** 5 minutes, 15 minutes, 1 hour, or 1 day. It also refreshes on wake from sleep and when you click ↻.
 - **Show usage percentage in menu bar:** shows e.g. `7%` instead of `$96/$1500`.
 - **Show days left in menu bar:** has a sub-option to add a "left" suffix (`19d left`).
+- **Automatically check for updates:** on by default. When it's off, the app only updates when you click **Check for updates**.
 - **Launch at login:** uses `SMAppService`. If macOS asks, approve it under System Settings → General → Login Items.
 
 The menu bar rounds numbers up to keep the text short. The dropdown shows exact values.

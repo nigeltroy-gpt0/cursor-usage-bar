@@ -11,12 +11,22 @@ final class Updater: ObservableObject {
     static let assetName = "cursor-usage-bar.dmg"
     private static let checkInterval: TimeInterval = 24 * 60 * 60
     private static let lastCheckKey = "lastUpdateCheck"
+    private static let autoUpdateKey = "autoUpdateEnabled"
 
     /// Shown in the dropdown while updating or after a failure; nil when idle.
     @Published private(set) var status: String?
 
+    /// When off, only "Check for updates" checks and installs; the daily check is skipped.
+    @Published var autoUpdateEnabled: Bool {
+        didSet { UserDefaults.standard.set(autoUpdateEnabled, forKey: Self.autoUpdateKey) }
+    }
+
     private var timer: Timer?
     @Published private var isRunning = false
+
+    private init() {
+        autoUpdateEnabled = UserDefaults.standard.object(forKey: Self.autoUpdateKey) as? Bool ?? true
+    }
 
     /// Local test builds ("(Test) Cursor Usage Bar") never auto-update; that would replace them with the release.
     static var isTestBuild: Bool {
@@ -43,6 +53,7 @@ final class Updater: ObservableObject {
     }
 
     private func checkIfDue() {
+        guard autoUpdateEnabled else { return }
         let last = UserDefaults.standard.object(forKey: Self.lastCheckKey) as? Date ?? .distantPast
         guard Date().timeIntervalSince(last) >= Self.checkInterval else { return }
         checkNow()
