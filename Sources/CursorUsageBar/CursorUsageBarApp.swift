@@ -26,7 +26,32 @@ struct UsageMenuView: View {
         return f
     }()
 
+    @State private var showingSettings = false
+
     var body: some View {
+        // Both pages are always laid out in one ZStack, so they share the same (larger) size
+        // and the window doesn't resize when switching between them.
+        ZStack(alignment: .topLeading) {
+            mainPage
+                .opacity(showingSettings ? 0 : 1)
+                .allowsHitTesting(!showingSettings)
+                .accessibilityHidden(showingSettings)
+            settingsPage
+                .opacity(showingSettings ? 1 : 0)
+                .allowsHitTesting(showingSettings)
+                .accessibilityHidden(!showingSettings)
+        }
+        .padding(14)
+        .frame(width: 300)
+        .onAppear { store.refreshLaunchAtLoginState() }
+        .onDisappear { showingSettings = false }
+    }
+
+    private func setShowingSettings(_ value: Bool) {
+        withAnimation(.easeInOut(duration: 0.15)) { showingSettings = value }
+    }
+
+    private var mainPage: some View {
         VStack(alignment: .leading, spacing: 12) {
             header
             if let s = store.snapshot { usageSection(s) }
@@ -36,14 +61,31 @@ struct UsageMenuView: View {
                     .foregroundStyle(.orange)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            Divider()
-            settingsSection
+            Spacer(minLength: 0)
             Divider()
             footer
         }
-        .padding(14)
-        .frame(width: 300)
-        .onAppear { store.refreshLaunchAtLoginState() }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+
+    private var settingsPage: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            ZStack {
+                Text("Settings").font(.headline)
+                HStack {
+                    Button { setShowingSettings(false) } label: {
+                        Label("Back", systemImage: "chevron.left")
+                    }
+                    .buttonStyle(.borderless)
+                    Spacer()
+                }
+            }
+            settingsSection
+            Divider()
+            updatesSection
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
     private var header: some View {
@@ -60,6 +102,9 @@ struct UsageMenuView: View {
                     .buttonStyle(.borderless)
                     .help("Refresh now")
             }
+            Button { setShowingSettings(true) } label: { Image(systemName: "gearshape") }
+                .buttonStyle(.borderless)
+                .help("Settings")
         }
     }
 
@@ -139,19 +184,23 @@ struct UsageMenuView: View {
                 Text(note).font(.caption).foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
+        }
+        .toggleStyle(.checkbox)
+    }
+
+    private var updatesSection: some View {
+        VStack(alignment: .leading, spacing: 6) {
             HStack {
+                Text("Version \(Updater.currentVersion)")
+                Spacer()
                 Button("Check for updates") { updater.checkNow(manual: true) }
                     .disabled(updater.isChecking)
                     .controlSize(.small)
-                if let status = updater.status {
-                    Text(status).font(.caption).foregroundStyle(.secondary)
-                        .lineLimit(2)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
             }
-            .padding(.top, 2)
+            Text(updater.status ?? "Checks for updates automatically once a day.")
+                .font(.caption).foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
-        .toggleStyle(.checkbox)
     }
 
     private var footer: some View {
