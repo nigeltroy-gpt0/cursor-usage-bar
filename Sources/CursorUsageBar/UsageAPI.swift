@@ -36,9 +36,10 @@ struct UsageSnapshot {
     let isUnlimited: Bool
     let fetchedAt: Date
 
-    var fraction: Double? {
-        guard let limit = limitDollars, limit > 0 else { return nil }
-        return usedDollars / limit
+    /// The plan's own spending limit, or nil if the plan has none (unlimited, or no limit reported).
+    var planLimitDollars: Double? {
+        guard !isUnlimited, let limit = limitDollars, limit > 0 else { return nil }
+        return limit
     }
 
     var daysLeft: Int? {

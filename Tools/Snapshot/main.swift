@@ -16,6 +16,7 @@ struct Snapshot {
         let history = HistoryModel()
         history.load()
 
+        store.customLimitDollars = nil
         for (name, appearance) in [("light", NSAppearance.Name.aqua), ("dark", .darkAqua)] {
             render(UsageMenuView(store: store), appearance: appearance, to: out.appendingPathComponent("menu-main-\(name).png"))
             render(UsageMenuView(store: store, showingSettings: true), appearance: appearance,
@@ -23,6 +24,19 @@ struct Snapshot {
             render(HistoryView(model: history).frame(width: 640, height: 400), appearance: appearance,
                    to: out.appendingPathComponent("history-\(name).png"))
         }
+
+        // A plan without a spending limit: first with no custom limit, then with one set.
+        DataSource.shared.stubPlanHasLimit = false
+        store.refresh()
+        render(UsageMenuView(store: store), appearance: .darkAqua, to: out.appendingPathComponent("nolimit-main-dark.png"))
+        render(UsageMenuView(store: store, showingSettings: true), appearance: .darkAqua,
+               to: out.appendingPathComponent("nolimit-settings-dark.png"))
+        store.customLimitDollars = 500
+        print("custom limit menu bar title:", store.menuBarTitle)
+        render(UsageMenuView(store: store), appearance: .darkAqua, to: out.appendingPathComponent("customlimit-main-dark.png"))
+        render(UsageMenuView(store: store, showingSettings: true), appearance: .darkAqua,
+               to: out.appendingPathComponent("customlimit-settings-dark.png"))
+        store.customLimitDollars = nil
     }
 
     @MainActor static func render<V: View>(_ view: V, appearance: NSAppearance.Name, to url: URL) {

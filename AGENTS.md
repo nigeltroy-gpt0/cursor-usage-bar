@@ -21,7 +21,7 @@ The main-line **Cursor Usage Bar** app may be installed and running on this mach
 - **Do not** run `./build.sh --release` locally. It writes `build/Cursor Usage Bar.app`, which may be the running main-line copy. It also exists for CI, which runs `./build.sh --release --dmg`.
 - **Do not** `pkill CursorUsageBar`, or delete or overwrite `Cursor Usage Bar.app` in `/Applications` or `build/`. To restart the test app, use `./build.sh --run`, which only kills `CursorUsageBarTest`.
 - **The test UI must mirror production exactly.** The menu bar text, dropdown, Settings, and history window look the same in both variants: no "(Test)" or "(T)" labels, no test-only banners or notes, and the same Updates section. Use `Updater.productName` ("Cursor Usage Bar") for any app name shown in the UI. Only the bundle name, ID, and executable differ, so both apps can be installed side by side.
-- **Test builds default to stub data.** `DataSource` serves deterministic fake usage (`StubData`), so test builds never read Cursor's token or trigger a Keychain prompt, and UI-only changes need no re-authentication. To use real data, right-click the menu bar item and choose **Connect to and use live Cursor data**. That right-click menu is the only test-only UI, and the choice resets to stub on every launch. Release builds always use live data.
+- **Test builds default to stub data.** `DataSource` serves deterministic fake usage (`StubData`), so test builds never read Cursor's token or trigger a Keychain prompt, and UI-only changes need no re-authentication. To use real data, right-click the menu bar item and choose **Connect to and use live Cursor data**. The same menu has **Stub data: simulate a plan without a spending limit**, for testing the custom-limit setting. That right-click menu is the only test-only UI, and both choices reset on every launch. Release builds always use live data.
 
 ## UI conventions
 
@@ -34,6 +34,7 @@ The main-line **Cursor Usage Bar** app may be installed and running on this mach
   - Spacing: 4, 8, 12 or 16pt (`Theme.Space`).
   - Show hierarchy with weight and `.secondary` colour, not extra sizes.
 - Every control uses `.controlSize(.regular)`, set once at the root.
+- Anything that shows a limit or percentage uses `UsageStore.effectiveLimitDollars` / `UsageStore.fraction`. That's the plan's limit if it has one, otherwise the user's custom limit. Never read `UsageSnapshot.limitDollars` directly in UI.
 - Money uses `UsageStore.money` ("$1,500.00", always with cents) or, in the menu bar only, `UsageStore.wholeMoney` ("$1,500", rounded up).
 - Detail rows are label/value `Grid` rows of equal height (`Theme.rowHeight`). Secondary info goes right-aligned in the same row. Keep buttons out of detail rows.
 - Actions go at the bottom of their section: on the main page, the equal-width "See usage history" and "Dashboard" buttons sit above the footer; in Settings, "Check for updates" is at the bottom of the Updates group.

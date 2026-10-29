@@ -28,6 +28,14 @@ final class UsageStore: ObservableObject {
         didSet { UserDefaults.standard.set(showPercentageInMenuBar, forKey: Keys.showPercentage) }
     }
 
+    /// User-defined limit per billing period, used only when the plan has no limit of its own.
+    @Published var customLimitDollars: Double? {
+        didSet {
+            if let v = customLimitDollars, v <= 0 { customLimitDollars = nil; return }
+            UserDefaults.standard.set(customLimitDollars, forKey: Keys.customLimit)
+        }
+    }
+
     /// Refresh interval choices, in minutes.
     static let refreshOptions = [5, 15, 60, 1440]
 
@@ -42,6 +50,7 @@ final class UsageStore: ObservableObject {
         static let showDaysLeft = "showDaysLeftInMenuBar"
         static let showLeftSuffix = "showLeftSuffix"
         static let showPercentage = "showPercentageInMenuBar"
+        static let customLimit = "customLimitDollars"
     }
 
     init() {
@@ -51,6 +60,7 @@ final class UsageStore: ObservableObject {
         showDaysLeftInMenuBar = defaults.object(forKey: Keys.showDaysLeft) as? Bool ?? true
         showLeftSuffix = defaults.bool(forKey: Keys.showLeftSuffix)
         showPercentageInMenuBar = defaults.bool(forKey: Keys.showPercentage)
+        customLimitDollars = (defaults.object(forKey: Keys.customLimit) as? Double).flatMap { $0 > 0 ? $0 : nil }
         refreshLaunchAtLoginState()
 
         wakeObserver = NSWorkspace.shared.notificationCenter.addObserver(
@@ -136,14 +146,36 @@ final class UsageStore: ObservableObject {
         }
     }
 
+    // MARK: - Limit
+
+    /// True once usage has loaded and the plan turns out to have no limit of its own.
+    var planHasNoLimit: Bool {
+        snapshot.map { $0.planLimitDollars == nil } ?? false
+    }
+
+    /// The plan's limit if it has one, otherwise the user's own limit (if set).
+    var effectiveLimitDollars: Double? {
+        snapshot?.planLimitDollars ?? customLimitDollars
+    }
+
+    var isUsingCustomLimit: Bool {
+        snapshot?.planLimitDollars == nil && customLimitDollars != nil
+    }
+
+    /// Fraction of the effective limit used, or nil when there's no limit at all.
+    var fraction: Double? {
+        guard let s = snapshot, let limit = effectiveLimitDollars, limit > 0 else { return nil }
+        return s.usedDollars / limit
+    }
+
     // MARK: - Formatting
 
     var menuBarTitle: String {
         guard let s = snapshot else { return errorMessage == nil ? "$…" : "$ –" }
         var title: String
-        if showPercentageInMenuBar, let f = s.fraction, !s.isUnlimited {
+        if showPercentageInMenuBar, let f = fraction {
             title = "\(Int((f * 100).rounded(.up)))%"
-        } else if let limit = s.limitDollars, !s.isUnlimited {
+        } else if let limit = effectiveLimitDollars {
             title = "\(Self.wholeMoney(s.usedDollars))/\(Self.wholeMoney(limit))"
         } else {
             title = Self.wholeMoney(s.usedDollars)

@@ -9,6 +9,8 @@ final class DataSource: NSObject {
     static let shared = DataSource()
 
     private(set) var useLiveData = !Updater.isTestBuild
+    /// Stub data only: whether the fake plan has a $1,500 limit, or none (to test custom limits).
+    var stubPlanHasLimit = true
     /// Called after the user switches sources, so views can clear and reload.
     var onChange: (() -> Void)?
 
@@ -39,7 +41,19 @@ final class DataSource: NSObject {
         item.target = self
         item.state = useLiveData ? .on : .off
         menu.addItem(item)
+        let noLimit = NSMenuItem(title: "Stub data: simulate a plan without a spending limit",
+                                 action: #selector(toggleStubLimit), keyEquivalent: "")
+        noLimit.target = self
+        noLimit.state = stubPlanHasLimit ? .off : .on
+        noLimit.isEnabled = !useLiveData
+        menu.addItem(noLimit)
         return menu
+    }
+
+    @objc private func toggleStubLimit() {
+        stubPlanHasLimit.toggle()
+        onChange?()
+        HistoryWindowController.shared.reloadIfOpen()
     }
 
     @objc private func toggleLiveData() {
@@ -64,8 +78,10 @@ enum StubData {
         amount(for: Calendar.current.startOfDay(for: now), now: now)
     }
 
-    /// Current calendar month (UTC) as the billing period, with a $1500 limit.
-    static func snapshot(now: Date = Date()) -> UsageSnapshot {
+    /// Current calendar month (UTC) as the billing period, with a $1,500 limit unless
+    /// `DataSource.stubPlanHasLimit` is off.
+    @MainActor static func snapshot(now: Date = Date()) -> UsageSnapshot {
+        let hasLimit = DataSource.shared.stubPlanHasLimit
         var utc = Calendar(identifier: .gregorian)
         utc.timeZone = TimeZone(identifier: "UTC")!
         let start = utc.date(from: utc.dateComponents([.year, .month], from: now))!
@@ -79,9 +95,9 @@ enum StubData {
             billingCycleEnd: iso.string(from: end),
             membershipType: "pro",
             limitType: "user",
-            isUnlimited: false,
+            isUnlimited: !hasLimit,
             individualUsage: .init(
-                overall: .init(enabled: true, used: used * 100, limit: 150_000, remaining: nil),
+                overall: .init(enabled: true, used: used * 100, limit: hasLimit ? 150_000 : nil, remaining: nil),
                 plan: nil, onDemand: nil),
             teamUsage: nil
         )

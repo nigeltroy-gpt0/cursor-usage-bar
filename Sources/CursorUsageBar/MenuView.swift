@@ -99,18 +99,24 @@ struct UsageMenuView: View {
                 Text(UsageStore.money(s.usedDollars))
                     .font(.appHero)
                     .monospacedDigit()
-                if let limit = s.limitDollars, !s.isUnlimited {
+                if let limit = store.effectiveLimitDollars {
                     Text("of \(UsageStore.money(limit))").font(.appHeroDetail).foregroundStyle(.secondary)
+                        .help(store.isUsingCustomLimit ? "Your own limit, set in Settings" : "Your plan's limit")
                 }
                 Spacer()
-                if let f = s.fraction {
+                if let f = store.fraction {
                     Text(String(format: "%.2f%%", f * 100))
                         .font(.appHeroDetail)
                         .monospacedDigit()
                         .foregroundStyle(.secondary)
+                } else if store.planHasNoLimit {
+                    // No plan limit and none set: point to the Settings field instead of a percentage.
+                    Button("Set limit…") { setShowingSettings(true) }
+                        .buttonStyle(.link)
+                        .help("Your plan has no spending limit. Set your own to track % used.")
                 }
             }
-            if let f = s.fraction {
+            if let f = store.fraction {
                 ProgressView(value: min(f, 1))
                     .tint(f >= 0.9 ? .red : f >= 0.7 ? .orange : .accentColor)
             }
@@ -129,13 +135,13 @@ struct UsageMenuView: View {
                     Text(UsageStore.money(avg)).monospacedDigit()
                 }
             }
-            if let projected = s.projectedDollars, !s.isUnlimited {
+            if let projected = s.projectedDollars {
                 GridRow {
                     rowLabel("Projected")
                     HStack(spacing: Theme.Space.s) {
                         Text(UsageStore.money(projected))
                             .monospacedDigit()
-                            .foregroundStyle((s.limitDollars.map { projected > $0 } ?? false) ? .orange : .primary)
+                            .foregroundStyle((store.effectiveLimitDollars.map { projected > $0 } ?? false) ? .orange : .primary)
                         Spacer(minLength: 0)
                         Text("at current pace").foregroundStyle(.secondary)
                     }
@@ -226,6 +232,21 @@ struct UsageMenuView: View {
                 ))
                 if let note = store.launchAtLoginNote {
                     hint(note)
+                }
+            }
+            if store.planHasNoLimit {
+                settingsGroup("Spending limit") {
+                    HStack(spacing: Theme.Space.s) {
+                        Text("Limit per billing period")
+                        Spacer()
+                        HStack(spacing: Theme.Space.xs) {
+                            Text("$").foregroundStyle(.secondary)
+                            TextField("None", value: $store.customLimitDollars, format: .number.grouping(.automatic))
+                                .multilineTextAlignment(.trailing)
+                                .frame(width: 80)
+                        }
+                    }
+                    hint("Your plan has no limit. Set one to track % used.")
                 }
             }
             settingsGroup("Menu bar") {
