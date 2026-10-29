@@ -250,7 +250,14 @@ struct UsageMenuView: View {
                 }
             }
             settingsGroup("Menu bar") {
-                Toggle("Show percentage instead of dollars", isOn: $store.showPercentageInMenuBar)
+                // With no limit at all there's no percentage, so the option is off and disabled.
+                // The saved preference is kept and applies again once a limit exists.
+                Toggle("Show percentage instead of dollars", isOn: Binding(
+                    get: { store.hasAnyLimit && store.showPercentageInMenuBar },
+                    set: { store.showPercentageInMenuBar = $0 }
+                ))
+                .disabled(!store.hasAnyLimit)
+                .help(store.hasAnyLimit ? "" : "Set a spending limit to show a percentage.")
                 Toggle("Show days left", isOn: $store.showDaysLeftInMenuBar)
                 if store.showDaysLeftInMenuBar {
                     Toggle("Show \u{201C}left\u{201D} suffix", isOn: $store.showLeftSuffix)

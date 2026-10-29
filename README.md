@@ -59,7 +59,7 @@ Open Settings with the gear icon in the dropdown, and use **‹ Back** to return
 
 - **Refresh every:** 5 minutes, 15 minutes, 1 hour, or 1 day. It also refreshes on wake from sleep and when you click ↻.
 - **Spending limit → Limit per billing period:** only shown if your Cursor plan has no spending limit. Set your own limit to get the % used, the progress bar, and `$D/$limit` in the menu bar. Leave it empty for none. If your plan has a limit, the plan's limit is always used.
-- **Menu bar → Show percentage instead of dollars:** shows e.g. `7%` instead of `$96/$1,500`.
+- **Menu bar → Show percentage instead of dollars:** shows e.g. `7%` instead of `$96/$1,500`. It's disabled when your plan has no limit and you haven't set one.
 - **Menu bar → Show days left:** has a sub-option to add a “left” suffix (`19d left`).
 - **Updates → Automatically check for updates daily:** on by default. When it's off, the app only updates when you click **Check for updates**.
 - **Launch at login:** uses `SMAppService`. If macOS asks, approve it under System Settings → General → Login Items.

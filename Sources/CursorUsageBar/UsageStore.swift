@@ -158,6 +158,12 @@ final class UsageStore: ObservableObject {
         snapshot?.planLimitDollars ?? customLimitDollars
     }
 
+    /// False only when the plan has no limit and the user hasn't set one, so no percentage exists.
+    /// (Also true before usage has loaded, so Settings doesn't flicker on launch.)
+    var hasAnyLimit: Bool {
+        snapshot == nil || effectiveLimitDollars != nil
+    }
+
     var isUsingCustomLimit: Bool {
         snapshot?.planLimitDollars == nil && customLimitDollars != nil
     }
